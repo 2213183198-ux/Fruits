@@ -54,6 +54,16 @@ docker compose logs -f
 - 具备模型管理、部署评测、样本导出和容器化交付能力
 - 完成前后端联调，不停留在命令行脚本阶段
 
+## 模型权重说明
+
+模型权重未随仓库提交。运行前请将训练好的模型放到：
+
+`runs/train/fruit_quality_check/weights/best.pt`
+
+或通过环境变量指定：
+
+`FRUIT_MODEL_PATH=你的模型路径`
+
 ## 推荐路径
 
 1. 首页概览
