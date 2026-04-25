@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生鲜分拣多模型视觉质检平台</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">VQ</div>
+        <div class="brand-copy">
+          <h1 id="sidebarProjectName">生鲜分拣多模型视觉质检平台</h1>
+          <p class="support-note" id="sidebarSupportNote">多模型质检 · 人工复核 · 自动化回流</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section is-open" data-sidebar-group="overview">
+          <button class="sidebar-section-toggle" type="button" data-sidebar-toggle="overview" aria-expanded="true">
+            <span class="sidebar-section-title">总览</span>
+            <span class="sidebar-section-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-section-body" data-sidebar-content="overview">
+            <button class="nav-link is-active" type="button" data-panel="overview">概览</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section" data-sidebar-group="workbench">
+          <button class="sidebar-section-toggle" type="button" data-sidebar-toggle="workbench" aria-expanded="false">
+            <span class="sidebar-section-title">检测工作台</span>
+            <span class="sidebar-section-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-section-body" data-sidebar-content="workbench" hidden>
+            <button class="nav-link" type="button" data-panel="single">单图检测</button>
+            <button class="nav-link" type="button" data-panel="batch">批量检测</button>
+            <button class="nav-link" type="button" data-panel="webcam">摄像头检测</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section" data-sidebar-group="management">
+          <button class="sidebar-section-toggle" type="button" data-sidebar-toggle="management" aria-expanded="false">
+            <span class="sidebar-section-title">平台管理</span>
+            <span class="sidebar-section-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-section-body" data-sidebar-content="management" hidden>
+            <button class="nav-link" type="button" data-panel="models">模型中心</button>
+            <button class="nav-link" type="button" data-panel="settings">规则设置</button>
+            <button class="nav-link" type="button" data-panel="deployment">部署与评测</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section" data-sidebar-group="tracking">
+          <button class="sidebar-section-toggle" type="button" data-sidebar-toggle="tracking" aria-expanded="false">
+            <span class="sidebar-section-title">数据追踪</span>
+            <span class="sidebar-section-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="sidebar-section-body" data-sidebar-content="tracking" hidden>
+            <button class="nav-link" type="button" data-panel="review">复核中心</button>
+            <button class="nav-link" type="button" data-panel="retrain">复训目录</button>
+            <button class="nav-link" type="button" data-panel="history">历史记录</button>
+            <button class="nav-link" type="button" data-panel="cleanup">文件清理</button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="sidebar-link" href="/docs" target="_blank" rel="noreferrer">API 文档</a>
+      </div>
+    </aside>
+
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="关闭侧边栏"></button>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <button class="mobile-toggle" id="sidebarToggle" type="button">菜单</button>
+
+        <div class="topbar-main">
+          <div class="topbar-copy">
+            <h2 id="headerProjectName">生鲜分拣多模型视觉质检平台</h2>
+            <p id="headerProjectSubtitle">多模型质检、复核回流与复训样本闭环</p>
+          </div>
+
+          <div class="topbar-meta">
+            <div class="service-indicator" id="headerServiceIndicator" title="后端状态">
+              <span class="service-dot"></span>
+            </div>
+            <div class="model-badge" id="headerModelBadge">-</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel is-active" data-panel="overview">
+          <div class="panel-header compact-header">
+            <h3>概览</h3>
+          </div>
+
+          <div id="overviewNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-overview">
+            <article class="surface surface-overview-primary">
+              <div class="surface-head">
+                <h4>当前模型</h4>
+              </div>
+              <div id="overviewModelCard" class="compact-block"></div>
+              <div class="surface-divider"></div>
+              <div id="overviewQuickLinks" class="shortcut-board"></div>
+            </article>
+
+            <article class="surface surface-overview-secondary">
+              <div class="surface-head">
+                <h4>已知类别</h4>
+              </div>
+              <div id="overviewClassList" class="chip-list scroll-panel">
+                <div class="empty-state">暂无类别映射</div>
+              </div>
+            </article>
+
+            <article class="surface surface-overview-history">
+              <div class="surface-head">
+                <h4>最近记录</h4>
+              </div>
+              <div id="overviewRecentRuns" class="scroll-panel">
+                <div class="empty-state">暂无记录</div>
+              </div>
+            </article>
+
+            <article class="surface surface-overview-dashboard">
+              <div class="surface-head">
+                <h4>统计看板</h4>
+              </div>
+              <div id="overviewDashboardStats" class="summary-row">
+                <div class="empty-state">统计数据未加载</div>
+              </div>
+              <div class="surface-divider"></div>
+              <div class="overview-dashboard-grid">
+                <section class="overview-dashboard-block">
+                  <div class="surface-head">
+                    <h4>质检分布</h4>
+                  </div>
+                  <div id="overviewStatusBoard" class="overview-metric-list">
+                    <div class="empty-state">等待统计</div>
+                  </div>
+                </section>
+                <section class="overview-dashboard-block">
+                  <div class="surface-head">
+                    <h4>闭环进度</h4>
+                  </div>
+                  <div id="overviewOpsBoard" class="overview-metric-list">
+                    <div class="empty-state">等待统计</div>
+                  </div>
+                </section>
+              </div>
+              <div class="surface-divider"></div>
+              <section class="overview-dashboard-block">
+                <div class="surface-head">
+                  <h4>最近 7 天</h4>
+                </div>
+                <div id="overviewTrend" class="overview-trend-grid">
+                  <div class="empty-state">等待统计</div>
+                </div>
+              </section>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="models">
+          <div class="panel-header">
+            <h3>模型中心</h3>
+            <div class="panel-actions">
+              <button id="refreshModelsBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="modelNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-models">
+            <article class="surface control-surface surface-single-controls">
+              <div class="surface-head">
+                <h4>上传模型</h4>
+              </div>
+
+              <div class="field-stack">
+                <label class="field">
+                  <span>模型文件</span>
+                  <input id="modelUploadFile" type="file" accept=".pt,.onnx">
+                </label>
+
+                <label class="field">
+                  <span>YAML 配置</span>
+                  <input id="modelYamlFile" type="file" accept=".yaml,.yml">
+                </label>
+
+                <label class="checkbox-field">
+                  <input id="modelAutoActivate" type="checkbox" checked>
+                  <span>上传后自动启用</span>
+                </label>
+
+                <div class="action-row">
+                  <button id="modelUploadBtn" class="btn btn-primary" type="button">上传</button>
+                  <button id="modelResetBtn" class="btn btn-secondary" type="button">清空</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface surface-single-preview">
+              <div class="surface-head">
+                <h4>模型列表</h4>
+              </div>
+
+              <div id="modelSummary" class="summary-row"></div>
+              <div class="surface-divider"></div>
+
+              <div class="compact-block">
+                <div class="surface-head">
+                  <h4>模型对比看板</h4>
+                </div>
+                <div id="modelCompareBoard" class="table-wrap model-compare-board">
+                  <div class="empty-state">暂无模型</div>
+                </div>
+              </div>
+
+              <div class="surface-divider"></div>
+              <div id="modelList" class="model-list scroll-panel">
+                <div class="empty-state">暂无模型</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="single">
+          <div class="panel-header compact-header">
+            <h3>单图检测</h3>
+          </div>
+
+          <div id="singleNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-single">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>检测参数</h4>
+              </div>
+
+              <div id="singleActiveModel" class="context-line"></div>
+
+              <div class="field-stack">
+                <label class="field">
+                  <span>图片</span>
+                  <input id="singleFile" type="file" accept="image/*">
+                </label>
+
+                <div class="field-row">
+                  <label class="field">
+                    <span>imgsz</span>
+                    <input id="singleImgsz" type="number" min="320" max="1280" step="32" value="416">
+                  </label>
+                  <label class="field">
+                    <span>conf</span>
+                    <input id="singleConf" type="number" min="0.01" max="0.99" step="0.01" value="0.25">
+                  </label>
+                </div>
+
+                <div class="action-row">
+                  <button id="singleRunBtn" class="btn btn-primary" type="button">开始检测</button>
+                  <button id="singleResetBtn" class="btn btn-secondary" type="button">重置</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>结果图</h4>
+              </div>
+
+              <div class="preview-grid">
+                <div class="preview-card">
+                  <div class="preview-label">原图</div>
+                  <div class="preview-stage">
+                    <div id="singleSourcePlaceholder" class="empty-state">选择图片</div>
+                    <img id="singleSourceImage" class="preview-image" hidden alt="原图">
+                  </div>
+                </div>
+
+                <div class="preview-card">
+                  <div class="preview-label">标注图</div>
+                  <div class="preview-stage">
+                    <div id="singleResultPlaceholder" class="empty-state">等待结果</div>
+                    <img id="singleResultImage" class="preview-image" hidden alt="检测结果">
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface result-surface surface-single-result">
+              <div class="surface-head">
+                <h4>检测结果</h4>
+              </div>
+
+              <div id="singleSummary" class="summary-row"></div>
+              <div id="singleReport" class="result-box result-scroll">
+                <div class="empty-state">等待结果</div>
+              </div>
+              <div class="inline-links">
+                <a href="#batch" id="singleGoBatchBtn" data-jump-panel="batch">切换到批量检测</a>
+              </div>
+              <div id="singleDetections" class="result-box result-scroll">
+                <div class="empty-state">暂无检测</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="batch">
+          <div class="panel-header compact-header">
+            <h3>批量检测</h3>
+          </div>
+
+          <div id="batchNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-aside">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>检测参数</h4>
+              </div>
+
+              <div id="batchActiveModel" class="context-line"></div>
+
+              <div class="field-stack">
+                <label class="field">
+                  <span>多张图片</span>
+                  <input id="batchFiles" type="file" accept="image/*" multiple>
+                </label>
+
+                <label class="field">
+                  <span>整个文件夹</span>
+                  <input id="batchFolder" type="file" accept="image/*" multiple webkitdirectory directory>
+                </label>
+
+                <div id="batchDropZone" class="drop-zone">
+                  <strong>拖拽图片到这里</strong>
+                  <span>支持 Ctrl / Shift 多选</span>
+                </div>
+
+                <div class="field-row">
+                  <label class="field">
+                    <span>imgsz</span>
+                    <input id="batchImgsz" type="number" min="320" max="1280" step="32" value="416">
+                  </label>
+                  <label class="field">
+                    <span>conf</span>
+                    <input id="batchConf" type="number" min="0.01" max="0.99" step="0.01" value="0.25">
+                  </label>
+                </div>
+
+                <div class="action-row">
+                  <button id="batchRunBtn" class="btn btn-primary" type="button">开始检测</button>
+                  <button id="batchResetBtn" class="btn btn-secondary" type="button">清空</button>
+                </div>
+              </div>
+            </article>
+
+            <div class="stack">
+              <article class="surface surface-batch-selection">
+                <div class="surface-head">
+                  <h4>已选文件</h4>
+                </div>
+                <div id="batchSelection" class="result-box result-scroll">
+                  <div class="empty-state">暂无文件</div>
+                </div>
+              </article>
+
+              <article class="surface surface-batch-results">
+                <div class="surface-head">
+                  <h4>批量结果</h4>
+                </div>
+                <div id="batchSummary" class="summary-row"></div>
+                <div id="batchLinks" class="inline-links"></div>
+                <div id="batchResults" class="result-box result-scroll result-scroll-lg">
+                  <div class="empty-state">等待结果</div>
+                </div>
+                <div id="batchFailures" class="result-box result-scroll">
+                  <div class="empty-state">暂无失败项</div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="webcam">
+          <div class="panel-header compact-header">
+            <h3>摄像头检测</h3>
+          </div>
+
+          <div id="webcamNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-aside">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>控制</h4>
+              </div>
+
+              <div id="webcamActiveModel" class="context-line"></div>
+
+              <div class="field-stack">
+                <div class="field-row">
+                  <label class="field">
+                    <span>imgsz</span>
+                    <input id="webcamImgsz" type="number" min="320" max="1280" step="32" value="416">
+                  </label>
+                  <label class="field">
+                    <span>conf</span>
+                    <input id="webcamConf" type="number" min="0.01" max="0.99" step="0.01" value="0.25">
+                  </label>
+                </div>
+
+                <div class="action-column">
+                  <button id="webcamStartBtn" class="btn btn-primary" type="button">启动摄像头</button>
+                  <button id="webcamDetectBtn" class="btn btn-secondary" type="button">检测一帧</button>
+                  <button id="webcamAutoBtn" class="btn btn-secondary" type="button">自动检测</button>
+                  <button id="webcamStopBtn" class="btn btn-ghost" type="button">停止</button>
+                </div>
+              </div>
+            </article>
+
+            <div class="stack">
+              <article class="surface surface-webcam-stage">
+                <div class="surface-head">
+                  <h4>画面</h4>
+                </div>
+                <div class="video-stage">
+                  <video id="webcamVideo" autoplay muted playsinline></video>
+                  <canvas id="webcamOverlay"></canvas>
+                  <div class="video-stage-hint">未启动</div>
+                </div>
+              </article>
+
+              <article class="surface surface-webcam-result">
+                <div class="surface-head">
+                  <h4>检测结果</h4>
+                </div>
+                <div id="webcamMetrics" class="summary-row"></div>
+                <div id="webcamReport" class="result-box result-scroll">
+                  <div class="empty-state">等待结果</div>
+                </div>
+                <div id="webcamDetections" class="result-box result-scroll">
+                  <div class="empty-state">暂无检测</div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="deployment">
+          <div class="panel-header compact-header">
+            <h3>部署与评测</h3>
+          </div>
+
+          <div id="deploymentNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-aside">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>部署操作</h4>
+              </div>
+
+              <div id="deploymentCurrentTarget" class="context-line"></div>
+
+              <div class="field-stack">
+                <label class="field">
+                  <span>导出 ONNX</span>
+                  <input id="exportImgsz" type="number" min="320" max="1280" step="32" value="416">
+                </label>
+                <div class="action-row">
+                  <button id="exportOnnxBtn" class="btn btn-primary" type="button">导出 ONNX</button>
+                  <button id="exportTensorRtBtn" class="btn btn-secondary" type="button">导出 TensorRT</button>
+                </div>
+
+                <div class="surface-divider"></div>
+
+                <label class="field">
+                  <span>Benchmark 图片</span>
+                  <input id="benchmarkFile" type="file" accept="image/*">
+                </label>
+
+                <div class="field-row">
+                  <label class="field">
+                    <span>imgsz</span>
+                    <input id="benchmarkImgsz" type="number" min="320" max="1280" step="32" value="416">
+                  </label>
+                  <label class="field">
+                    <span>conf</span>
+                    <input id="benchmarkConf" type="number" min="0.01" max="0.99" step="0.01" value="0.25">
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>runs</span>
+                  <input id="benchmarkRuns" type="number" min="1" max="10" step="1" value="3">
+                </label>
+
+                <button id="benchmarkRunBtn" class="btn btn-secondary" type="button">运行 Benchmark</button>
+              </div>
+            </article>
+
+            <article class="surface surface-deployment-output">
+              <div class="surface-head">
+                <h4>输出结果</h4>
+              </div>
+              <div id="deploymentStatusCards" class="summary-row"></div>
+              <div id="deploymentOutput" class="result-box result-scroll result-scroll-lg">
+                <div class="empty-state">等待结果</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="settings">
+          <div class="panel-header">
+            <h3>规则设置</h3>
+            <div class="panel-actions">
+              <button id="refreshQualityRulesBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="settingsNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-history">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>质检阈值</h4>
+              </div>
+
+              <div class="field-stack">
+                <label class="checkbox-field">
+                  <input id="qualityRulesEnabled" type="checkbox" checked>
+                  <span>启用鲜腐质检规则</span>
+                </label>
+
+                <div class="field-row">
+                  <label class="field">
+                    <span>Pass 最大腐烂比例</span>
+                    <input id="passMaxRottenRate" type="number" min="0" max="1" step="0.01" value="0">
+                  </label>
+                  <label class="field">
+                    <span>Warning 最大腐烂比例</span>
+                    <input id="warningMaxRottenRate" type="number" min="0" max="1" step="0.01" value="0.5">
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>新鲜关键词</span>
+                  <input id="freshKeywordsInput" type="text" placeholder="fresh, 新鲜, 好果">
+                </label>
+
+                <label class="field">
+                  <span>腐烂关键词</span>
+                  <input id="rottenKeywordsInput" type="text" placeholder="rotten, 腐烂, 坏果">
+                </label>
+
+                <div class="action-row">
+                  <button id="saveQualityRulesBtn" class="btn btn-primary" type="button">保存规则</button>
+                  <button id="resetQualityRulesBtn" class="btn btn-secondary" type="button">恢复当前值</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>提示文案</h4>
+              </div>
+
+              <div id="qualityRulesSummary" class="summary-row"></div>
+
+              <div class="field-stack">
+                <label class="field">
+                  <span>无目标提示</span>
+                  <textarea id="qualityNoDetectionMessage" rows="3"></textarea>
+                </label>
+
+                <label class="field">
+                  <span>仅检测提示</span>
+                  <textarea id="qualityDetectedOnlyMessage" rows="3"></textarea>
+                </label>
+
+                <label class="field">
+                  <span>Pass 提示</span>
+                  <textarea id="qualityPassMessage" rows="3"></textarea>
+                </label>
+
+                <label class="field">
+                  <span>Warning 提示</span>
+                  <textarea id="qualityWarningMessage" rows="3"></textarea>
+                </label>
+
+                <label class="field">
+                  <span>Critical 提示</span>
+                  <textarea id="qualityCriticalMessage" rows="3"></textarea>
+                </label>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="history">
+          <div class="panel-header">
+            <h3>历史记录</h3>
+            <div class="panel-actions">
+              <button id="refreshHistoryBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="historyNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-history">
+            <article class="surface">
+              <div class="surface-head">
+                <h4>记录列表</h4>
+              </div>
+              <div class="history-toolbar">
+                <div class="action-row">
+                  <button id="historyDeleteSelectedBtn" class="btn btn-secondary" type="button">删除选中</button>
+                  <button id="historyDeleteAllBtn" class="btn btn-danger" type="button">清空全部</button>
+                </div>
+
+                <div class="field-row">
+                  <label class="field">
+                    <span>开始时间</span>
+                    <input id="historyCreatedFrom" type="datetime-local">
+                  </label>
+                  <label class="field">
+                    <span>结束时间</span>
+                    <input id="historyCreatedTo" type="datetime-local">
+                  </label>
+                </div>
+
+                <button id="historyDeleteRangeBtn" class="btn btn-ghost" type="button">按时间删除</button>
+              </div>
+              <div id="historyList" class="scroll-panel">
+                <div class="empty-state">暂无记录</div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>记录详情</h4>
+              </div>
+              <div id="historyDetail" class="result-box result-scroll result-scroll-xl">
+                <div class="empty-state">选择记录查看</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="review">
+          <div class="panel-header">
+            <h3>复核中心</h3>
+            <div class="panel-actions">
+              <button id="refreshReviewBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="reviewNotice" class="notice"></div>
+
+          <div class="workspace-grid workspace-grid-history">
+            <article class="surface">
+              <div class="surface-head">
+                <h4>复核队列</h4>
+              </div>
+
+              <div class="history-toolbar">
+                <div class="action-row review-filter-row">
+                  <button class="btn btn-secondary is-active" id="reviewQueueFocusBtn" type="button" data-review-queue="focus">重点复核</button>
+                  <button class="btn btn-secondary" id="reviewQueueAllBtn" type="button" data-review-queue="all">全部样本</button>
+                  <button class="btn btn-secondary" id="reviewQueueFeedbackBtn" type="button" data-review-queue="feedback">回流队列</button>
+                  <button class="btn btn-ghost" id="exportReviewQueueBtn" type="button">导出当前队列</button>
+                </div>
+                <div class="action-row review-filter-row">
+                  <button class="btn btn-secondary is-active" type="button" data-review-decision="all">全部类型</button>
+                  <button class="btn btn-secondary" type="button" data-review-decision="false_positive">误检</button>
+                  <button class="btn btn-secondary" type="button" data-review-decision="missed_detection">漏检</button>
+                  <button class="btn btn-secondary" type="button" data-review-decision="needs_feedback">通用回流</button>
+                  <button class="btn btn-secondary" type="button" data-review-decision="confirm">人工确认</button>
+                </div>
+                <div id="reviewSummary" class="summary-row"></div>
+
+                <div id="feedbackPoolPanel" class="feedback-pool-panel" hidden>
+                  <div class="helper-note">回流样本池用于沉淀误检、漏检和边界样本，可按来源模式和关键词筛选后直接导出当前视图。</div>
+                  <div id="feedbackPoolSummary" class="summary-row"></div>
+                  <label class="field">
+                    <span>样本检索</span>
+                    <input id="reviewKeywordInput" type="text" placeholder="按文件名、备注或模型结论筛选">
+                  </label>
+                  <div class="field">
+                    <span>来源模式</span>
+                    <div class="summary-row review-mode-row">
+                      <button class="btn btn-secondary is-active" type="button" data-review-mode="all">全部模式</button>
+                      <button class="btn btn-secondary" type="button" data-review-mode="single">单图</button>
+                      <button class="btn btn-secondary" type="button" data-review-mode="batch">批量</button>
+                      <button class="btn btn-secondary" type="button" data-review-mode="webcam">摄像头</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="reviewList" class="scroll-panel">
+                <div class="empty-state">暂无复核样本</div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>复核详情</h4>
+              </div>
+              <div id="reviewDetail" class="result-box result-scroll result-scroll-xl">
+                <div class="empty-state">选择样本查看</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="retrain">
+          <div class="panel-header">
+            <h3>复训目录</h3>
+            <div class="panel-actions">
+              <button id="refreshRetrainBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="retrainNotice" class="notice"></div>
+          <div id="retrainSummary" class="summary-row"></div>
+
+          <div class="workspace-grid workspace-grid-history retrain-batch-grid">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>训练批次</h4>
+              </div>
+              <div id="retrainBatchSummary" class="summary-row"></div>
+              <div class="field-stack">
+                <div id="retrainSelectionHint" class="helper-note">勾选待复训样本后，可在这里创建训练批次并导出 manifest。</div>
+                <label class="field">
+                  <span>批次名称</span>
+                  <input id="retrainBatchNameInput" type="text" placeholder="例如：fresh-sort-batch-001">
+                </label>
+                <label class="field">
+                  <span>批次备注</span>
+                  <textarea id="retrainBatchNotesInput" rows="4" placeholder="例如：补充遮挡、阴影和堆叠场景 bad case，用于下一轮数据整理。"></textarea>
+                </label>
+                <div class="action-row review-action-row">
+                  <button id="createRetrainBatchBtn" class="btn btn-primary" type="button">创建训练批次</button>
+                  <button id="clearRetrainSelectionBtn" class="btn btn-secondary" type="button">清空勾选</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>批次详情</h4>
+              </div>
+              <div id="retrainBatchDetail" class="result-box result-scroll result-scroll-xl">
+                <div class="empty-state">选择批次查看详情，或先从下方目录勾选样本创建训练批次</div>
+              </div>
+              <div class="surface-divider"></div>
+              <div class="surface-head">
+                <h4>最近批次</h4>
+              </div>
+              <div id="retrainBatchList" class="scroll-panel">
+                <div class="empty-state">暂无训练批次</div>
+              </div>
+            </article>
+          </div>
+
+          <div class="workspace-grid workspace-grid-history">
+            <article class="surface">
+              <div class="surface-head">
+                <h4>目录列表</h4>
+              </div>
+
+              <div class="history-toolbar">
+                <div class="action-row review-filter-row">
+                  <button class="btn btn-secondary is-active" type="button" data-retrain-status="all">全部状态</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-status="pending">待处理</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-status="ready">待复训</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-status="used">已入训练</button>
+                </div>
+                <div class="action-row review-filter-row">
+                  <button class="btn btn-secondary is-active" type="button" data-retrain-decision="all">全部来源</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-decision="false_positive">误检</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-decision="missed_detection">漏检</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-decision="needs_feedback">通用回流</button>
+                </div>
+                <div class="action-row review-filter-row">
+                  <button class="btn btn-secondary is-active" type="button" data-retrain-mode="all">全部模式</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-mode="single">单图</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-mode="batch">批量</button>
+                  <button class="btn btn-secondary" type="button" data-retrain-mode="webcam">摄像头</button>
+                </div>
+                <label class="field">
+                  <span>样本检索</span>
+                  <input id="retrainKeywordInput" type="text" placeholder="按文件名、备注或来源模型筛选">
+                </label>
+              </div>
+
+              <div id="retrainList" class="scroll-panel">
+                <div class="empty-state">暂无复训样本</div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>目录详情</h4>
+              </div>
+              <div id="retrainDetail" class="result-box result-scroll result-scroll-xl">
+                <div class="empty-state">选择样本查看</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="cleanup">
+          <div class="panel-header">
+            <h3>文件清理</h3>
+            <div class="panel-actions">
+              <button id="refreshStorageBtn" class="btn btn-secondary" type="button">刷新</button>
+            </div>
+          </div>
+
+          <div id="cleanupNotice" class="notice"></div>
+          <div id="storageSummary" class="summary-row"></div>
+
+          <div class="workspace-grid workspace-grid-history">
+            <article class="surface control-surface">
+              <div class="surface-head">
+                <h4>清理操作</h4>
+              </div>
+
+              <div class="field-stack">
+                <div class="helper-note">仅清理生成的标注图、CSV 和 Excel 文件，不影响历史记录。</div>
+                <button id="deleteSelectedBtn" class="btn btn-danger" type="button">删除选中</button>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="surface-head">
+                <h4>可清理文件</h4>
+              </div>
+              <div id="artifactList" class="scroll-panel">
+                <div class="empty-state">暂无文件</div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="overlay" id="globalOverlay" hidden>
+    <div class="overlay-card">
+      <div class="overlay-spinner" id="overlaySpinner"></div>
+      <h4 id="overlayTitle">处理中...</h4>
+      <p id="overlayDetail">请稍候</p>
+
+      <div class="overlay-progress" id="overlayProgressBlock" hidden>
+        <div class="progress-track">
+          <div class="progress-bar" id="overlayProgressBar"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="overlayProgressValue">0%</span>
+          <span id="overlaySpeed">0 MB/s</span>
+          <span id="overlayEta">ETA --</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

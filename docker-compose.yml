@@ -1,0 +1,25 @@
+services:
+  fruit-inspection:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fruit-inspection-app
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      FRUIT_MODEL_PATH: /app/runs/train/fruit_quality_check/weights/best.pt
+      FRUIT_ONNX_MODEL_PATH: /app/runs/train/fruit_quality_check/weights/best.onnx
+      FRUIT_RESULTS_CSV_PATH: /app/runs/train/fruit_quality_check/results.csv
+      FRUIT_MODEL_STORE_DIR: /app/backend/models
+      FRUIT_QUALITY_RULES_PATH: /app/backend/runtime/quality_rules.json
+    volumes:
+      - ./backend/artifacts:/app/backend/artifacts
+      - ./backend/models:/app/backend/models
+      - ./backend/runtime:/app/backend/runtime
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/system/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s

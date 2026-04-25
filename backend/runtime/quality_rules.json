@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "fresh_keywords": [
+    "fresh",
+    "新鲜",
+    "好果"
+  ],
+  "rotten_keywords": [
+    "rotten",
+    "腐烂",
+    "坏果"
+  ],
+  "pass_max_rotten_rate": 0.0,
+  "warning_max_rotten_rate": 0.5,
+  "messages": {
+    "no_detection": "未检测到目标，请检查图片内容是否与当前模型类别匹配，或更换更清晰的图片后重试。",
+    "detected_only": "当前模型为通用目标检测模型，本次仅展示检测框和类别统计，不输出鲜腐等级结论。",
+    "pass_message": "未检测到腐烂水果，当前样本可通过基础质检。",
+    "warning_message": "检测到部分腐烂水果，建议进行人工复核或二次分拣。",
+    "critical_message": "腐烂比例较高，建议将该批次标记为重点复检或直接剔除。"
+  },
+  "updated_at": "2026-04-11 20:31:34"
+}

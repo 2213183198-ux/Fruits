@@ -1,0 +1,12 @@
+fastapi>=0.115
+numpy>=1.24
+onnx>=1.17
+onnxruntime>=1.19
+openpyxl>=3.1
+python-multipart>=0.0.9
+pillow>=10.0
+pydantic>=2.0
+pyyaml>=6.0
+ultralytics>=8.3
+opencv-python>=4.8
+uvicorn[standard]>=0.30

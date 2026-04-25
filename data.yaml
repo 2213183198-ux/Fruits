@@ -1,0 +1,14 @@
+path: data
+train: images/train
+val: images/valid
+test: images/test
+
+nc: 6
+
+names:
+  - fresh_apple
+  - fresh_banana
+  - fresh_orange
+  - rotten_banana
+  - rotten_orange
+  - rotten_apple
