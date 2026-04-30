@@ -12,6 +12,8 @@
 - 回流闭环：人工复核、bad case 回流、复训目录、训练批次、标准样本包导出
 - 部署与评测：ONNX 导出、TensorRT 导出链路、Benchmark、Docker / Docker Compose
 - 工程交付：OpenAPI 文档、API smoke tests、GitHub Actions CI
+  
+<img width="2547" height="1294" alt="1335cb2b-44da-4ccd-b29e-245ad6e3c670" src="https://github.com/user-attachments/assets/f991c3e4-00d0-4aee-93d2-8b0e390a133f" />
 
 ## 快速启动
 
